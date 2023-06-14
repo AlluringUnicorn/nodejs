@@ -10,7 +10,7 @@ require("dotenv").config();
 
 const { SECRET_KEY } = process.env;
 
-const signup = async (req, res, next) => {
+const register = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
@@ -25,40 +25,81 @@ const signup = async (req, res, next) => {
 
     res.status(201).json({
       email: newUser.email,
-      name: newUser.name,
+      subscription: "starter",
     });
   } catch (error) {
     next(error);
   }
 };
 
-const signin = async (req, res, next) => {
+const login = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      throw HttpError(401);
+      throw HttpError(401, "Email or password is wrong");
     }
 
     const passwordCompare = await bcrypt.compare(password, user.password);
     if (!passwordCompare) {
-      throw HttpError(401);
+      throw HttpError(401, "Email or password is wrong");
     }
 
+    const { _id: id } = user;
+
     const payload = {
-      id: user._id,
+      id,
     };
 
     const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "23h" });
+    await User.findByIdAndUpdate(id, { token });
 
-    res.json({ token });
+    res.json({
+      token,
+      user: {
+        email,
+        subscription: user.subscription,
+      },
+    });
   } catch (error) {
     next(error);
   }
 };
 
+const getCurrent = async (req, res, next) => {
+  try {
+    const user = req.user;
+
+    res.json({
+      email: user.email,
+      subscription: user.subscription,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const logout = async (req, res, next) => {
+  const { _id } = req.user;
+
+  if (!_id) {
+    throw HttpError(401, "Not authorized");
+  }
+
+  try {
+    await User.findByIdAndUpdate(_id, { token: "" });
+
+    res.status(204).json({
+      message: "Logout success",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 module.exports = {
-  signup,
-  signin,
+  register,
+  login,
+  getCurrent,
+  logout,
 };

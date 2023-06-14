@@ -8,7 +8,9 @@ const schemas = require('../../schemas/contacts');
 const {validateBody} = require('../../decorators/validateBody');
 
 const isValidId = require("../../middlewares/isValidId");
+const authenticate = require('../../middlewares/authenticate');
 
+router.use(authenticate);
 
 router.get("/",contactsController.getAllContacts);
 
