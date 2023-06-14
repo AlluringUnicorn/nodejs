@@ -1,5 +1,7 @@
 const { Schema, model } = require("mongoose");
 
+const handleMongooseError = require('../middlewares/handleMongooseError');
+
 const contactSchema = new Schema({
   name: {
     type: String,
@@ -17,10 +19,7 @@ const contactSchema = new Schema({
   },
 }, {versionKey: false});
 
-contactSchema.post("save", (error, data, next)=>{
-    error.status = 400;
-    next();
-})
+contactSchema.post("save", handleMongooseError);
 
 const Contact = model("contact", contactSchema);
 
