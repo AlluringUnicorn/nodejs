@@ -2,7 +2,7 @@ const { Schema, model } = require("mongoose");
 
 const { emailRegexp } = require("../constants/users");
 
-const handleMongooseError = require('../helpers/handleMongooseError');
+const handleMongooseError = require("../helpers/handleMongooseError");
 
 const userSchema = new Schema(
   {
@@ -20,7 +20,7 @@ const userSchema = new Schema(
       match: emailRegexp,
       unique: true,
     },
-    avatarURL:{
+    avatarURL: {
       type: String,
     },
     subscription: {
@@ -29,6 +29,14 @@ const userSchema = new Schema(
       default: "starter",
     },
     token: String,
+    verify: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken:{
+      type: String,
+      required: [true, 'Verify token is required'],
+    }
   },
   { versionKey: false }
 );

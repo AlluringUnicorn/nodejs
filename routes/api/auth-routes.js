@@ -12,6 +12,10 @@ const authenticate = require('../../middlewares/authenticate');
 
 router.post("/register", validateBody(schemas.userRegisterSchema), authController.register);
 
+router.get("/verify/:verificationToken", authController.verify);
+
+router.post("/verify", validateBody(schemas.userEmailSchema), authController.resendVerify);
+
 router.post("/login", validateBody(schemas.userLoginSchema), authController.login);
 
 router.get("/current", authenticate, authController.getCurrent);
